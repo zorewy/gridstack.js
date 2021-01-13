@@ -4,7 +4,9 @@
  */
 
 import { DDDraggable } from './dd-draggable';
+import { DDDroppable } from './dd-droppable';
 
 export class DDManager {
   static dragElement: DDDraggable;
+  static dropElement: DDDroppable;
 }
