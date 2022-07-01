@@ -185,7 +185,14 @@ GridStack.prototype._setupAcceptWidget = function(this: GridStack): GridStack {
       helper = helper || el;
       let w = node.w || Math.round(helper.offsetWidth / cellWidth) || 1;
       let h = node.h || Math.round(helper.offsetHeight / cellHeight) || 1;
-
+  
+      console.log({
+        asdas: node.grid && node.grid !== this,
+        el,
+        helper,
+        node,
+        aaaaa: this
+      })
       // if the item came from another grid, make a copy and save the original info in case we go back there
       if (node.grid && node.grid !== this) {
         // copy the node original values (min/max/id/etc...) but override width/height/other flags which are this grid specific
@@ -199,8 +206,23 @@ GridStack.prototype._setupAcceptWidget = function(this: GridStack): GridStack {
         node._isExternal =  // DOM needs to be re-parented on a drop
         node._temporaryRemoved = true; // so it can be inserted onDrag below
       } else {
-        node.w = w; node.h = h;
-        node._temporaryRemoved = true; // so we can insert it
+        if (this.opts.class === 'sub1') {
+          el.gridstackNode = node = {...node, w, h, grid: this};
+          this.engine.cleanupNode(node)
+            .nodeBoundFix(node);
+          // node.el.remove()
+          
+          // this.placeholder.remove();
+          console.log({
+            el,
+            node,
+            aa: this
+          })
+          node._temporaryRemoved = true; // so it can be inserted onDrag below
+        } else {
+          node.w = w; node.h = h;
+          node._temporaryRemoved = true; // so we can insert it
+        }
       }
 
       // clear any marked for complete removal (Note: don't check _isAboutToRemove as that is cleared above - just do it)

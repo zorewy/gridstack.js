@@ -60,3 +60,6 @@ h1 {
 .sidebar .grid-stack-item .grid-stack-item-content {
   background: none;
 }
+.sub1 {
+  border: 1px solid #f10;
+}
