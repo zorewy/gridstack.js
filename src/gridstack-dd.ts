@@ -185,14 +185,7 @@ GridStack.prototype._setupAcceptWidget = function(this: GridStack): GridStack {
       helper = helper || el;
       let w = node.w || Math.round(helper.offsetWidth / cellWidth) || 1;
       let h = node.h || Math.round(helper.offsetHeight / cellHeight) || 1;
-  
-      console.log({
-        asdas: node.grid && node.grid !== this,
-        el,
-        helper,
-        node,
-        aaaaa: this
-      })
+      // fix grid add widget
       // if the item came from another grid, make a copy and save the original info in case we go back there
       if (node.grid && node.grid !== this) {
         // copy the node original values (min/max/id/etc...) but override width/height/other flags which are this grid specific
@@ -206,18 +199,21 @@ GridStack.prototype._setupAcceptWidget = function(this: GridStack): GridStack {
         node._isExternal =  // DOM needs to be re-parented on a drop
         node._temporaryRemoved = true; // so it can be inserted onDrag below
       } else {
-        if (this.opts.class === 'sub1') {
-          el.gridstackNode = node = {...node, w, h, grid: this};
-          this.engine.cleanupNode(node)
-            .nodeBoundFix(node);
+        console.log({
+          asd: this
+        })
+        if (this.opts.class === 'sub') {
+          el.gridstackNode = node = {...node, el, w, h, grid: this};
+          // this.engine.cleanupNode(node)
+          //   .nodeBoundFix(node);
           // node.el.remove()
           
           // this.placeholder.remove();
-          console.log({
-            el,
-            node,
-            aa: this
-          })
+          // console.log({
+          //   el,
+          //   node,
+          //   aa: this
+          // })
           node._temporaryRemoved = true; // so it can be inserted onDrag below
         } else {
           node.w = w; node.h = h;
@@ -238,12 +234,16 @@ GridStack.prototype._setupAcceptWidget = function(this: GridStack): GridStack {
      */
     .on(this.el, 'dropout', (event, el: GridItemHTMLElement, helper: GridItemHTMLElement) => {
       // TEST console.log(`out ${this.el.gridstack.opts.id} ${count++}`);
+      
       let node = el.gridstackNode;
       if (!node) return false;
       // fix #1578 when dragging fast, we might get leave after other grid gets enter (which calls us to clean)
       // so skip this one if we're not the active grid really..
-      if (!node.grid || node.grid === this) {
+      if (!node.grid  || node.grid === this) {
         this._leave(el, helper);
+      }
+      if (node.grid !== this) {
+        this.placeholder.remove()
       }
       return false; // prevent parent from receiving msg (which may be grid as well)
     })
@@ -428,6 +428,7 @@ GridStack.prototype._prepareDragDropByNode = function(this: GridStack, node: Gri
 
       // if the item has moved to another grid, we're done here
       let target: GridItemHTMLElement = event.target as GridItemHTMLElement;
+      
       if (!target.gridstackNode || target.gridstackNode.grid !== this) return;
 
       node.el = target;
@@ -516,6 +517,9 @@ GridStack.prototype._onStartMoving = function(this: GridStack, el: GridItemHTMLE
 
   if (event.type === 'dropover' && node._temporaryRemoved) {
     // TEST console.log('engine.addNode x=' + node.x);
+    console.log('node', {
+      node
+    })
     this.engine.addNode(node); // will add, fix collisions, update attr and clear _temporaryRemoved
     node._moving = true; // AFTER, mark as moving object (wanted fix location before)
   }
@@ -540,7 +544,6 @@ GridStack.prototype._leave = function(this: GridStack, el: GridItemHTMLElement, 
   if (!node) return;
 
   GridStackDD.get().off(el, 'drag'); // no need to track while being outside
-
   // this gets called when cursor leaves and shape is outside, so only do this once
   if (node._temporaryRemoved) return;
   node._temporaryRemoved = true;
